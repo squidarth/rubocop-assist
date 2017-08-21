@@ -8,6 +8,7 @@ require 'json'
 
 require 'sinatra/cross_origin'
 require 'pry'
+require 'parser/current'
 
 configure do
   enable :cross_origin
@@ -19,6 +20,15 @@ options "*" do
   response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
 
   200
+end
+
+post '/parser-parse' do
+  content_type :json
+  response.headers["Allow"] = "HEAD,GET,PUT,POST,DELETE,OPTIONS"
+  response.headers["Access-Control-Allow-Origin"] = "*"
+  response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
+
+  return { ast: Parser::CurrentRuby.parse(params["code"]).to_s.gsub("\n", "") }.to_json
 end
 
 post '/rubocop-parse' do
