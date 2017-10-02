@@ -1,0 +1,133 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <style>
+    .code-sample {
+      border-bottom: 3px solid  #ddd;
+    }
+    .footer {
+      border-top: 3px solid #ddd;
+    }
+  </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Rubocop Rule Tester</h1>
+      </header>
+
+      <div class="row code-sample">
+        <div class="col-md-6">
+          <textarea class="rc-code-sample-box"># Code Sample</textarea>
+        </div>
+
+        <div class="col-md-6">
+          <textarea class="rc-parse-result-box" cols="65" rows="8"></textarea>
+        </div>
+      </div>
+
+      <div class="row rc-rule">
+        <div class="col-md-6">
+          <textarea class="rc-rule-box"># Rubocop rule class</textarea>
+        </div>
+
+        <div class="col-md-6">
+          <textarea class="rc-rule-evaluation-box" cols="65" rows="8"></textarea>
+        </div>
+      </div>
+
+      <div class="footer text-right">
+        By <a href="github.com/squidarth">@squidarth</a>. Tweet <a href="twitter.com/sidpshanker">@sidpshanker</a>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-git.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/ruby/ruby.min.js"></script>
+    <script type="text/javascript">
+      function runRules(codeSampleText, ruleText) {
+
+        $.ajax({
+
+        });
+      }
+
+      var codeSampleArea = $(".rc-code-sample-box");
+      var codeSampleCodeMirror = CodeMirror.fromTextArea(codeSampleArea[0], {
+        value: "# Code Sample",
+        mode: "ruby",
+        lineNumbers: true,
+        gutters: ['bordered'],
+      });
+
+      var codeRuleArea = $(".rc-rule-box");
+      var codeRuleCodeMirror = CodeMirror.fromTextArea(codeRuleArea[0], {
+        value: "# Rubocop rule class",
+        mode: "ruby",
+        lineNumbers: true,
+        gutters: ['bordered'],
+      });
+      var parseResultBox = $(".rc-parse-result-box");
+      var parseResultCodeMirror = CodeMirror.fromTextArea(parseResultBox[0], {
+        lineWrapping: true,
+        gutters: ['bordered']
+      });
+      var ruleResultBox = $(".rc-rule-evaluation-box");
+      var ruleResultCodeMirror = CodeMirror.fromTextArea(ruleResultBox[0], {
+        gutters: ['bordered']
+      });
+
+      function runRules(codeSampleText, ruleText) {
+        $.ajax({
+          method: "POST",
+          data: {
+            code: codeSampleText,
+            rule: ruleText
+          },
+          url: '/rubocop-rule-eval'
+        }).done(function(response) {
+          ruleResultCodeMirror.setValue(response.value);
+        });
+      }
+
+      var codeParsingTimeout, ruleRunningTimout = null;
+      codeSampleCodeMirror.on('change', function(cm, changeObj) {
+        cm.getValue();
+        if (codeParsingTimeout) {
+          clearTimeout(codeParsingTimeout);
+        }
+
+        codeParsingTimeout= setTimeout(function () {
+          $.ajax({
+            method: "POST",
+            url: "/parse",
+            data: {
+              code: cm.getValue()
+            }
+          }).done(function (response) {
+            parseResultCodeMirror.setValue(response.ast)
+          });
+        }, 1000);
+
+        if (ruleRunningTimout) {
+          clearTimeout(ruleRunningTimout);
+        }
+
+        ruleRunningTimout = setTimeout(function () {
+          runRules(cm.getValue(), codeRuleCodeMirror.getValue());
+        }, 1000);
+      });
+
+      codeRuleCodeMirror.on('change', function(cm, changeObj) {
+        if (ruleRunningTimout) {
+          clearTimeout(ruleRunningTimout);
+        }
+
+        ruleRunningTimout = setTimeout(function () {
+          runRules(codeSampleCodeMirror.getValue(), cm.getValue());
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>
