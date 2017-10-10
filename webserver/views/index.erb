@@ -9,17 +9,27 @@
     .footer {
       border-top: 3px solid #ddd;
     }
+
+    .subtitle {
+      font-size: .5em;
+    }
   </style>
   </head>
   <body>
     <div class="container">
       <header>
-        <h1>Rubocop Rule Tester</h1>
+        <h1>
+          Ruby Proctor
+          <small class="subtitle text-muted">Rapidly Develop New Rubocop Rules</small>
+        </h1>
       </header>
 
       <div class="row code-sample">
         <div class="col-md-6">
-          <textarea class="rc-code-sample-box"># Code Sample</textarea>
+          <textarea class="rc-code-sample-box">
+# Sample Code
+
+Blah.test</textarea>
         </div>
 
         <div class="col-md-6">
@@ -29,7 +39,29 @@
 
       <div class="row rc-rule">
         <div class="col-md-6">
-          <textarea class="rc-rule-box"># Rubocop rule class</textarea>
+          <textarea class="rc-rule-box">
+# Sample Rubocop Rule
+
+module RuboCop
+  module Cop
+    module Style
+      # Prevent calling .test on any Ruby object
+      class DummyCop < Cop
+        MSG = "Don't call .test".freeze
+
+        def_node_matcher :test,
+                         '(send _ :test)'
+
+        def on_send(node)
+          if test(node)
+            add_offense(node, :expression)
+          end
+        end
+      end
+    end
+  end
+end
+          </textarea>
         </div>
 
         <div class="col-md-6">
@@ -92,7 +124,8 @@
       }
 
       var codeParsingTimeout, ruleRunningTimout = null;
-      codeSampleCodeMirror.on('change', function(cm, changeObj) {
+
+      function codeSampleReload (cm) {
         cm.getValue();
         if (codeParsingTimeout) {
           clearTimeout(codeParsingTimeout);
@@ -117,9 +150,11 @@
         ruleRunningTimout = setTimeout(function () {
           runRules(cm.getValue(), codeRuleCodeMirror.getValue());
         }, 1000);
-      });
+      }
 
-      codeRuleCodeMirror.on('change', function(cm, changeObj) {
+      codeSampleCodeMirror.on('change', codeSampleReload);
+
+      codeRuleCodeMirror.on('change', function(cm) {
         if (ruleRunningTimout) {
           clearTimeout(ruleRunningTimout);
         }
@@ -127,6 +162,10 @@
         ruleRunningTimout = setTimeout(function () {
           runRules(codeSampleCodeMirror.getValue(), cm.getValue());
         }, 1000);
+      });
+
+      $(document).ready(function () {
+        codeSampleReload(codeSampleCodeMirror);
       });
     </script>
   </body>
