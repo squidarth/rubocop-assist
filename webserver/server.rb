@@ -30,7 +30,7 @@ def get_program
   end
 
   def eval_rule(code, rule, rule_name)
-    Timeout::timeout(5) {
+    Timeout::timeout(2) {
       eval rule
     }
 
@@ -40,7 +40,7 @@ def get_program
     options[:stdin] = code
     runner = RuboCop::Runner.new(options, RuboCop::ConfigStore.new)
 
-    Timeout::timeout(5) {
+    Timeout::timeout(2) {
       runner.run(['x.rb'])
     }
     output = $stdout.string
@@ -51,8 +51,9 @@ def get_program
     output
   end
 
-  code = ARGV[0]
-  rule = ARGV[1]
+  code = ARGV[0].dup
+  rule = ARGV[1].dup
+
   parsed_rule = Parser::CurrentRuby.parse(rule)
   rule_name = get_class_name(parsed_rule)
   puts eval_rule(code, rule, rule_name)
@@ -60,7 +61,7 @@ def get_program
 end
 
 def execute_ruby(code, rule)
-  stdout, = Open3.capture2('ruby', '-e', get_program, code, rule)
+  stdout, = Open3.capture2('ruby', '-e', get_program, code, rule, rlimit_cpu: [2,2])
   stdout
 end
 
