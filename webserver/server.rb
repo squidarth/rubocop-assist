@@ -69,6 +69,10 @@ get '/' do
   erb :index
 end
 
+get '/about' do
+  erb :about
+end
+
 post '/parse' do
   content_type :json
   response = Parser::CurrentRuby.parse(params["code"]).to_s
