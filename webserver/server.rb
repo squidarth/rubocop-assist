@@ -12,7 +12,7 @@ def execute_ruby(code, rule)
     code,
     rule,
     rlimit_cpu: [2, 2],
-    rlimit_nproc: 0
+    rlimit_nproc: 1
   )
   stdout
 end
