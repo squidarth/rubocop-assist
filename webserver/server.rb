@@ -7,12 +7,14 @@ set :bind, '0.0.0.0'
 
 def execute_ruby(code, rule)
   stdout, = Open3.capture2(
+    'timeout',
+    '--kill-after=6s',
+    '3s',
     'ruby',
     'runner.rb',
     code,
     rule,
-    rlimit_cpu: [2, 2],
-    rlimit_nproc: 1
+    rlimit_cpu: [2, 2]
   )
   stdout
 end

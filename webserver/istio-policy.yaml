@@ -1,0 +1,11 @@
+apiVersion: config.istio.io/v1alpha2
+kind: RouteRule
+metadata:
+  name: rcrr1-ingress
+spec:
+  destination:
+    name: rcrr1
+  route:
+  - labels:
+      run: rcrr1
+    weight: 100

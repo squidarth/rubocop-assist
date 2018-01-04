@@ -1,0 +1,24 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: rcrr1
+  labels:
+    run: rcrr1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: rcrr1
+  template:
+    metadata:
+      labels:
+        run: rcrr1
+    spec:
+      containers:
+      - name: rcrr1
+        image: squidarth/rubocop-rule-runner:v40
+        ports:
+        - containerPort: 4567
+        securityContext:
+          runAsUser: 1
+          readOnlyRootFilesystem: true

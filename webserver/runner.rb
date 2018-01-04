@@ -21,9 +21,7 @@ def get_class_name(ast)
 end
 
 def eval_rule(code, rule, rule_name)
-  Timeout::timeout(2) {
-    eval rule
-  }
+  eval rule
 
   options, = RuboCop::Options.new.parse(
     ['--format', 'simple','--only', rule_name]
@@ -31,9 +29,7 @@ def eval_rule(code, rule, rule_name)
   options[:stdin] = code
   runner = RuboCop::Runner.new(options, RuboCop::ConfigStore.new)
 
-  Timeout::timeout(2) {
-    runner.run(['x.rb'])
-  }
+  runner.run(['x.rb'])
   output = $stdout.string
 
   STDOUT.puts $stdout.string
